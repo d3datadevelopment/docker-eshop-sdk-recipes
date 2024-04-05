@@ -2,9 +2,9 @@
 
 SCRIPT_PATH=$(dirname ${BASH_SOURCE[0]})
 
-cd $SCRIPT_PATH/../../../../ || exit
+cd $SCRIPT_PATH/../../../ || exit
 
-git clone https://github.com/OXID-eSales/oxideshop_ce.git --branch=b-6.5.x source
+git clone https://github.com/OXID-eSales/oxideshop_ce.git --branch=b-6.2.x source
 
 make setup
 make addbasicservices
