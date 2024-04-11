@@ -10,6 +10,7 @@ cmdargs=""
 nosetup=false
 nodemodata=false
 shoplanguage="de"
+smarty=false
 
 usage(){
   >&2 cat << EOF
@@ -20,11 +21,12 @@ usage(){
      [ --no-setup ]
      [ --no-demodata ]
      [ --shoplanguage de ]
+     [ --smarty ]
 EOF
   exit 1
 }
 
-args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,no-setup,no-demodata,shoplanguage:,help -- "$@")
+args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,no-setup,no-demodata,shoplanguage:,smarty,help -- "$@")
 
 if [[ $# -eq 0 ]]; then
   usage
@@ -40,6 +42,7 @@ do
     --no-setup)     nosetup=true    ; shift   ;;
     --no-demodata)  nodemodata=true    ; shift   ;;
     --shoplanguage) shoplanguage=$2  ; shift 2 ;;
+    --smarty)       smarty=true    ; shift   ;;
     -h | --help)    usage       ; shift   ;;
     --) shift; break ;;
     *) >&2 echo Unsupported option: $1
@@ -72,6 +75,11 @@ make up
 
 docker compose exec php ${composercmd} create-project ${cmdargs}oxid-esales/oxideshop-project . dev-b-${minor}-${edition,,}
 
+if [ "$smarty" = true ]
+then
+  docker compose exec php ${composercmd} require d3/oxid-smarty-renderer-metapackage-${edition,,} oxid-esales/oxideshop-demodata-${edition,,}:"v7.1.0 as 8.0.0.0" --update-no-dev
+fi
+
 if [ "$nosetup" = false ]
 then 
   docker compose exec php ./vendor/bin/oe-console oe:setup:shop --db-host=mysql --db-port=3306 --db-name=example --db-user=root --db-password=root --shop-url=https://localhost.local --shop-directory=/var/www/source --compile-directory=/var/www/source/tmp --language=${shoplanguage}
@@ -85,7 +93,12 @@ then
   read -sp "Admin Login Password: " adm_passwd
   docker compose exec php ./vendor/bin/oe-console oe:admin:create-user --admin-email=${adm_mail} --admin-password=${adm_passwd}
   
-  docker compose exec php ./vendor/bin/oe-console oe:theme:activate apex
+  if [ "$smarty" = true ]
+  then
+    docker compose exec php ./vendor/bin/oe-console oe:theme:activate wave
+  else
+    docker compose exec php ./vendor/bin/oe-console oe:theme:activate apex
+  fi
 fi
 
 # restart Apache
