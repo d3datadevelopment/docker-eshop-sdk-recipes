@@ -6,6 +6,7 @@ set -euo pipefail
 minor=7.0
 edition="ee"
 cmdargs=""
+nosetup=false
 
 usage(){
   >&2 cat << EOF
@@ -13,11 +14,12 @@ usage(){
      [ -m7.0 | --minor 7.0 ]
      [ -ePE | --edition PE ]
      [ --no-dev ]
+     [ --no-setup ]
 EOF
   exit 1
 }
 
-args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,help -- "$@")
+args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,no-setup,help -- "$@")
 
 if [[ $# -eq 0 ]]; then
   usage
@@ -30,6 +32,7 @@ do
     -m | --minor)   minor=$2    ; shift 2 ;;
     -e | --edition) edition=$2  ; shift 2 ;;
     --no-dev)       cmdargs=${cmdargs}"--no-dev "    ; shift   ;;
+    --no-setup)     nosetup=true    ; shift   ;;
     -h | --help)    usage       ; shift   ;;
     --) shift; break ;;
     *) >&2 echo Unsupported option: $1
@@ -61,6 +64,11 @@ perl -pi\
 make up
 
 docker compose exec php composer create-project ${cmdargs}oxid-esales/oxideshop-project . dev-b-${minor}-${edition,,}
+
+if [ "$nosetup" = false ]
+then 
+  # run setup, but unavailable via CLI in OXID 6
+fi
 
 # restart Apache
 docker compose up -d
