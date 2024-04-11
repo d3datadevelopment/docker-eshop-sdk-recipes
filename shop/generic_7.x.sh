@@ -80,6 +80,12 @@ then
   then 
     docker compose exec php ./vendor/bin/oe-console oe:setup:demodata
   fi
+  
+  read -p "Admin Login E-Mail: " adm_mail
+  read -sp "Admin Login Password: " adm_passwd
+  docker compose exec php ./vendor/bin/oe-console oe:admin:create-user --admin-email=${adm_mail} --admin-password=${adm_passwd}
+  
+  docker compose exec php ./vendor/bin/oe-console oe:theme:activate apex
 fi
 
 # restart Apache
