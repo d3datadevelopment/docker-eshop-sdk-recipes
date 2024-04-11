@@ -5,17 +5,19 @@ set -euo pipefail
 
 minor=7.0
 edition="ee"
+cmdargs=""
 
 usage(){
   >&2 cat << EOF
   Usage: $0
      [ -m7.0 | --minor 7.0 ]
      [ -ePE | --edition PE ]
+     [ --no-dev ]
 EOF
   exit 1
 }
 
-args=$(getopt -a -o hm:e: --long minor:,edition:,help -- "$@")
+args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,help -- "$@")
 
 if [[ $# -eq 0 ]]; then
   usage
@@ -27,6 +29,7 @@ do
   case $1 in
     -m | --minor)   minor=$2    ; shift 2 ;;
     -e | --edition) edition=$2  ; shift 2 ;;
+    --no-dev)       cmdargs=${cmdargs}"--no-dev "    ; shift   ;;
     -h | --help)    usage       ; shift   ;;
     --) shift; break ;;
     *) >&2 echo Unsupported option: $1
@@ -57,7 +60,7 @@ perl -pi\
 # Start all containers
 make up
 
-docker compose exec php composer create-project oxid-esales/oxideshop-project . dev-b-${minor}-${edition,,}
+docker compose exec php composer create-project ${cmdargs}oxid-esales/oxideshop-project . dev-b-${minor}-${edition,,}
 
 # restart Apache
 docker compose up -d
