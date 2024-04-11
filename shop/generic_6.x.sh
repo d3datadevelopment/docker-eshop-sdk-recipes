@@ -1,14 +1,33 @@
 #!/bin/bash
 
-# Flags possible:
-# -e for shop edition. Possible values: CE/PE/EE
-# b-6.5.x.sh -ePE
+set -euo pipefail
+# set -x # debug mode
 
-edition='ee'
-while getopts e: flag; do
-  case "${flag}" in
-  e) edition=${OPTARG} ;;
-  *) ;;
+edition="ee"
+
+usage(){
+  >&2 cat << EOF
+  Usage: $0
+     [ -ePE | --edition PE ]
+EOF
+  exit 1
+}
+
+args=$(getopt -a -o he: --long edition:,help -- "$@")
+
+if [[ $# -eq 0 ]]; then
+  usage
+fi
+
+eval set -- ${args}
+while :
+do
+  case $1 in
+    -e | --edition)   edition=$2    ; shift 2 ;;
+    -h | --help)    usage      ; shift   ;;
+    --) shift; break ;;
+    *) >&2 echo Unsupported option: $1
+       usage ;;
   esac
 done
 
