@@ -68,7 +68,7 @@ docker compose exec php ${composercmd} create-project ${cmdargs}oxid-esales/oxid
 
 if [ "$nosetup" = false ]
 then 
-  # run setup, but unavailable via CLI in OXID 6
+  docker compose exec php ./vendor/bin/oe-console oe:setup:shop --db-host=mysql --db-port=3306 --db-name=example --db-user=root --db-password=root --shop-url=https://localhost.local --shop-directory=/var/www/source --compile-directory=/var/www/source/tmp --language=de
 fi
 
 # restart Apache
