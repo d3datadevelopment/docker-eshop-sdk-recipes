@@ -3,10 +3,12 @@
 set -euo pipefail
 # set -x # debug mode
 
+composercmd="composer"
 minor=7.0
 edition="ee"
 cmdargs=""
 nosetup=false
+composer1=false
 
 usage(){
   >&2 cat << EOF
@@ -15,11 +17,12 @@ usage(){
      [ -ePE | --edition PE ]
      [ --no-dev ]
      [ --no-setup ]
+     [ --composer1 ]
 EOF
   exit 1
 }
 
-args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,no-setup,help -- "$@")
+args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,no-setup,composer1,help -- "$@")
 
 if [[ $# -eq 0 ]]; then
   usage
@@ -33,6 +36,7 @@ do
     -e | --edition) edition=$2  ; shift 2 ;;
     --no-dev)       cmdargs=${cmdargs}"--no-dev "    ; shift   ;;
     --no-setup)     nosetup=true    ; shift   ;;
+    --composer1)    composercmd="composer1"   ; shift   ;;
     -h | --help)    usage       ; shift   ;;
     --) shift; break ;;
     *) >&2 echo Unsupported option: $1
@@ -63,7 +67,7 @@ perl -pi\
 # Start all containers
 make up
 
-docker compose exec php composer create-project ${cmdargs}oxid-esales/oxideshop-project . dev-b-${minor}-${edition,,}
+docker compose exec php ${composercmd} create-project ${cmdargs}oxid-esales/oxideshop-project . dev-b-${minor}-${edition,,}
 
 if [ "$nosetup" = false ]
 then 
