@@ -8,6 +8,7 @@ minor=7.0
 edition="ee"
 cmdargs=""
 nosetup=false
+nodemodata=false
 shoplanguage="de"
 
 usage(){
@@ -17,12 +18,13 @@ usage(){
      [ -ePE | --edition PE ]
      [ --no-dev ]
      [ --no-setup ]
+     [ --no-demodata ]
      [ --shoplanguage de ]
 EOF
   exit 1
 }
 
-args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,no-setup,shoplanguage:,help -- "$@")
+args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,no-setup,no-demodata,shoplanguage:,help -- "$@")
 
 if [[ $# -eq 0 ]]; then
   usage
@@ -36,7 +38,8 @@ do
     -e | --edition) edition=$2  ; shift 2 ;;
     --no-dev)       cmdargs=${cmdargs}"--no-dev "    ; shift   ;;
     --no-setup)     nosetup=true    ; shift   ;;
-    --shoplanguage)  shoplanguage=$2  ; shift 2 ;;
+    --no-demodata)  nodemodata=true    ; shift   ;;
+    --shoplanguage) shoplanguage=$2  ; shift 2 ;;
     -h | --help)    usage       ; shift   ;;
     --) shift; break ;;
     *) >&2 echo Unsupported option: $1
@@ -72,6 +75,11 @@ docker compose exec php ${composercmd} create-project ${cmdargs}oxid-esales/oxid
 if [ "$nosetup" = false ]
 then 
   docker compose exec php ./vendor/bin/oe-console oe:setup:shop --db-host=mysql --db-port=3306 --db-name=example --db-user=root --db-password=root --shop-url=https://localhost.local --shop-directory=/var/www/source --compile-directory=/var/www/source/tmp --language=${shoplanguage}
+  
+  if [ "$nodemodata" = false ]
+  then 
+    docker compose exec php ./vendor/bin/oe-console oe:setup:demodata
+  fi
 fi
 
 # restart Apache
