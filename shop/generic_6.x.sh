@@ -33,7 +33,7 @@ while :
 do
   case $1 in
     -m | --minor)   minor=$2    ; shift 2 ;;
-    -e | --edition) edition=$2  ; shift 2 ;;
+    -e | --edition) if echo $2 | grep -iq '^[C|P|E]E$'; then edition=$2; else echo "invalid shop edition, use default"; fi  ; shift 2 ;;
     --no-dev)       cmdargs=${cmdargs}"--no-dev "    ; shift   ;;
     --no-setup)     nosetup=true    ; shift   ;;
     --composer1)    composercmd="composer1"   ; shift   ;;
