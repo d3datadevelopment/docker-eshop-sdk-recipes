@@ -92,7 +92,7 @@ fi
 
 if [ "$nosetup" = false ]
 then 
-  docker compose exec php ./vendor/bin/oe-console oe:setup:shop --db-host=mysql --db-port=3306 --db-name=example --db-user=root --db-password=root --shop-url=https://localhost.local --shop-directory=/var/www/source --compile-directory=/var/www/source/tmp --language=${shoplanguage}
+  docker compose exec php ./vendor/bin/oe-console oe:setup:shop --db-host=mysql --db-port=3306 --db-name=example --db-user=root --db-password=root --shop-url=http://localhost.local --shop-directory=/var/www/source --compile-directory=/var/www/source/tmp --language=${shoplanguage}
   
   if [ "$nodemodata" = false ]
   then 
