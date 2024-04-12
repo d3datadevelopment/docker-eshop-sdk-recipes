@@ -101,13 +101,17 @@ then
   
   read -p "Admin Login E-Mail: " adm_mail
   read -sp "Admin Login Password: " adm_passwd
+  printf "\nSetup continues\n"
   docker compose exec php ./vendor/bin/oe-console oe:admin:create-user --admin-email=${adm_mail} --admin-password=${adm_passwd}
   
-  if [ "$smarty" = true ]
+  if awk "BEGIN {exit !(${minor} >= 7.1)}"; 
   then
-    docker compose exec php ./vendor/bin/oe-console oe:theme:activate wave
-  else
-    docker compose exec php ./vendor/bin/oe-console oe:theme:activate apex
+    if [ "$smarty" = true ]
+    then
+      docker compose exec php ./vendor/bin/oe-console oe:theme:activate wave
+    else
+      docker compose exec php ./vendor/bin/oe-console oe:theme:activate apex
+    fi
   fi
 fi
 
