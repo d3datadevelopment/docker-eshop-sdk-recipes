@@ -11,22 +11,24 @@ nosetup=false
 nodemodata=false
 shoplanguage="de"
 smarty=false
+patch=false
 
 usage(){
   >&2 cat << EOF
   Usage: $0
-     [ -m7.0 | --minor 7.0 ]
-     [ -ePE | --edition PE ]
-     [ --no-dev ]
-     [ --no-setup ]
-     [ --no-demodata ]
-     [ --shoplanguage de ]
-     [ --smarty ]
+     [ -ePE | --edition PE ]  # possible edition: CE, PE or EE
+     [ -m7.0 | --minor 7.0 ]  # install the latest stable of this minor version
+     [ --patch 3 ]            # use this patch instead of the latest stable in the selected minor version
+     [ --no-dev ]             # don't install development dependencies
+     [ --no-demodata ]        # don't install demodata
+     [ --no-setup ]           # don't perform command line setup
+     [ --shoplanguage de ]    # first shop language that set up
+     [ --smarty ]             # use Smarty (Wave) instead of Twig (Apex)
 EOF
   exit 1
 }
 
-args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,no-setup,no-demodata,shoplanguage:,smarty,help -- "$@")
+args=$(getopt -a -o hm:e: --long minor:,edition:,no-dev,no-setup,no-demodata,shoplanguage:,smarty,patch:,help -- "$@")
 
 if [[ $# -eq 0 ]]; then
   usage
@@ -37,6 +39,7 @@ while :
 do
   case $1 in
     -m | --minor)   minor=$2    ; shift 2 ;;
+    --patch)        patch=$2    ; shift 2 ;;
     -e | --edition) if echo $2 | grep -iq '^[C|P|E]E$'; then edition=$2; else echo "invalid shop edition, use default"; fi  ; shift 2 ;;
     --no-dev)       cmdargs=${cmdargs}"--no-dev "    ; shift   ;;
     --no-setup)     nosetup=true    ; shift   ;;
@@ -74,6 +77,13 @@ perl -pi\
 make up
 
 docker compose exec php ${composercmd} create-project ${cmdargs}oxid-esales/oxideshop-project . dev-b-${minor}-${edition,,}
+
+if [ "$patch" != false ]
+then
+  echo "docker compose exec php ${composercmd} require --no-update oxid-esales/oxideshop-metapackage-${edition,,}:v${minor}.${patch}"
+  echo "docker compose exec php ${composercmd} update --no-plugins --no-scripts ${cmdargs}"
+  echo "docker compose exec php ${composercmd} update ${cmdargs}"
+fi
 
 if [ "$smarty" = true ]
 then
