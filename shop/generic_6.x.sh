@@ -52,7 +52,7 @@ make setup
 make addbasicservices
 make file=services/adminer.yml addservice
 make file=services/selenium-chrome.yml addservice
-make file=recipes/oxid-esales/services/selenium-firefox-old.yml addservice
+make file=recipes/shop/services/selenium-firefox-old.yml addservice
 
 # Configure containers
 perl -pi\
@@ -69,10 +69,10 @@ make up
 
 docker compose exec php ${composercmd} create-project ${cmdargs}oxid-esales/oxideshop-project . dev-b-${minor}-${edition,,}
 
-if [ "$nosetup" = false ]
-then 
+# if [ "$nosetup" = false ]
+# then 
   # run setup, but unavailable via CLI in OXID 6
-fi
+# fi
 
 # restart Apache
 docker compose up -d
